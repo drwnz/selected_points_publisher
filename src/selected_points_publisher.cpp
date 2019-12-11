@@ -45,20 +45,29 @@ namespace rviz_plugin_selected_points_publisher
 {
 SelectedPointsPublisher::SelectedPointsPublisher()
 {
-  updateTopic();
+  updateSelectedTopic();
+  updatePublishedTopic();
 }
 
 SelectedPointsPublisher::~SelectedPointsPublisher()
 {
 }
 
-void SelectedPointsPublisher::updateTopic()
+void SelectedPointsPublisher::updatePublishedTopic()
 {
   node_handle_.param("frame_id", tf_frame_, std::string("/base_link"));
-  rviz_cloud_topic_ = std::string("/rviz_selected_points");
+  rviz_published_cloud_topic_ = std::string("/rviz_published_points");
 
-  rviz_selected_publisher_ = node_handle_.advertise<sensor_msgs::PointCloud2>(rviz_cloud_topic_.c_str(), 1);
+  rviz_published_publisher_ = node_handle_.advertise<sensor_msgs::PointCloud2>(rviz_published_cloud_topic_.c_str(), 1);
   num_selected_points_ = 0;
+}
+
+void SelectedPointsPublisher::updateSelectedTopic()
+{
+  node_handle_.param("frame_id", tf_frame_, std::string("/base_link"));
+  rviz_selected_cloud_topic_ = std::string("/rviz_selected_points");
+
+  rviz_selected_publisher_ = node_handle_.advertise<sensor_msgs::PointCloud2>(rviz_selected_cloud_topic_.c_str(), 1);
 }
 
 int SelectedPointsPublisher::processKeyEvent(QKeyEvent* event, rviz::RenderPanel* panel)
@@ -85,10 +94,10 @@ int SelectedPointsPublisher::processKeyEvent(QKeyEvent* event, rviz::RenderPanel
     }
     else if (event->key() == 'p' || event->key() == 'P')
     {
-      ROS_INFO_STREAM_NAMED("SelectedPointsPublisher.updateTopic",
+      ROS_INFO_STREAM_NAMED("SelectedPointsPublisher.updatePublishedTopic",
                             "Publishing " << num_selected_points_ << " selected points to topic "
-                                          << node_handle_.resolveName(rviz_cloud_topic_));
-      rviz_selected_publisher_.publish(selected_points_);
+                                          << node_handle_.resolveName(rviz_published_cloud_topic_));
+      rviz_published_publisher_.publish(selected_points_);
     }
   }
 }
@@ -195,6 +204,10 @@ int SelectedPointsPublisher::processSelectedArea()
 
   selected_points_.width = i;
   selected_points_.header.stamp = ros::Time::now();
+  ROS_INFO_STREAM_NAMED("SelectedPointsPublisher.updateSelectedTopic",
+                        "Publishing " << num_selected_points_ << " selected points to topic "
+                                      << node_handle_.resolveName(rviz_selected_cloud_topic_));
+  rviz_selected_publisher_.publish(selected_points_);
   return 0;
 }
 }  // namespace rviz_plugin_selected_points_publisher

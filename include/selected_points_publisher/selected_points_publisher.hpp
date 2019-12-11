@@ -48,16 +48,20 @@ public:
   virtual int processKeyEvent(QKeyEvent* event, rviz::RenderPanel* panel);
 
 public Q_SLOTS:
-  void updateTopic();
+  void updatePublishedTopic();
+  void updateSelectedTopic();
+
 
 protected:
   int processSelectedArea();
   ros::NodeHandle node_handle_;
   ros::Publisher rviz_selected_publisher_;
+  ros::Publisher rviz_published_publisher_;
   ros::Subscriber pointcloud_subscriber_;
 
   std::string tf_frame_;
-  std::string rviz_cloud_topic_;
+  std::string rviz_selected_cloud_topic_;
+  std::string rviz_published_cloud_topic_;
   std::string subscribed_cloud_topic_;
 
   sensor_msgs::PointCloud2 selected_points_;
